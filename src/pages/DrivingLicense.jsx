@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line,
 } from 'recharts'
+import DetailModal from '../components/DetailModal'
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.07)', ...style }}>
@@ -44,6 +46,19 @@ const conductorLic = [
 ]
 
 export default function DrivingLicense() {
+  const [selectedYear, setSelectedYear] = useState(null)
+  const [selectedRto, setSelectedRto] = useState(null)
+
+  const openYear = (d) => {
+    const idx = dlGrowth.findIndex(y => y.year === d.year)
+    const prev = dlGrowth[idx - 1]
+    setSelectedYear({ ...d, growth: prev ? (((d.total - prev.total) / prev.total) * 100).toFixed(2) : null })
+  }
+  const openRto = (r) => {
+    const rank = [...topRTOs].sort((a, b) => b.total - a.total).findIndex(x => x.rto === r.rto) + 1
+    setSelectedRto({ ...r, rank })
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
@@ -86,7 +101,7 @@ export default function DrivingLicense() {
               <YAxis tick={{ fontSize:10.5, fill:'#9CA3AF' }} axisLine={false} tickLine={false}
                 tickFormatter={v => `${(v/1000000).toFixed(1)}M`} />
               <Tooltip formatter={v => [v.toLocaleString('en-IN'), 'Total DLs']} />
-              <Bar dataKey="total" fill="#7C3AED" radius={[5,5,0,0]} maxBarSize={48} />
+              <Bar dataKey="total" fill="#7C3AED" radius={[5,5,0,0]} maxBarSize={48} onClick={openYear} cursor="pointer" />
             </BarChart>
           </ResponsiveContainer>
           <div style={{ display:'flex', gap:16, marginTop:8, flexWrap:'wrap' }}>
@@ -170,7 +185,7 @@ export default function DrivingLicense() {
                 tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
               <YAxis type="category" dataKey="rto" tick={{ fontSize:10.5, fill:'#374151' }} axisLine={false} tickLine={false} />
               <Tooltip formatter={v => [v.toLocaleString('en-IN'), 'DL Issued']} />
-              <Bar dataKey="total" fill="#7C3AED" radius={[0,4,4,0]} maxBarSize={18} />
+              <Bar dataKey="total" fill="#7C3AED" radius={[0,4,4,0]} maxBarSize={18} onClick={openRto} cursor="pointer" />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -239,6 +254,28 @@ export default function DrivingLicense() {
           ))}
         </div>
       </div>
+
+      <DetailModal
+        open={!!selectedYear}
+        onClose={() => setSelectedYear(null)}
+        title={`Driving Licenses — ${selectedYear?.year}`}
+        subtitle="Cumulative DLs as on 31st March"
+        rows={selectedYear ? [
+          ['Total DLs', selectedYear.total.toLocaleString('en-IN')],
+          ...(selectedYear.growth !== null ? [['YoY Growth', `+${selectedYear.growth}%`]] : []),
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedRto}
+        onClose={() => setSelectedRto(null)}
+        title={selectedRto?.rto}
+        subtitle="DL Issued (Non-Professional) 2024-25"
+        rows={selectedRto ? [
+          ['DL Issued', selectedRto.total.toLocaleString('en-IN')],
+          ['Rank Among Listed RTOs', `#${selectedRto.rank} of ${topRTOs.length}`],
+        ] : []}
+      />
     </div>
   )
 }

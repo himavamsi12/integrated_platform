@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
+import DetailModal from '../components/DetailModal'
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.07)', ...style }}>
@@ -77,6 +79,12 @@ const rcTransactions = [
 ]
 
 export default function VehicleRegistration() {
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [selectedDivision, setSelectedDivision] = useState(null)
+  const [selectedTxn, setSelectedTxn] = useState(null)
+
+  const divisionTotal = divisionData.reduce((s, d) => s + d.value, 0)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* Top Stats – 2025-26 Cumulative (Apr 2025 to Jan 2026) */}
@@ -147,7 +155,9 @@ export default function VehicleRegistration() {
             </thead>
             <tbody>
               {categoryData.map((row, i) => (
-                <tr key={row.name} style={{ borderBottom: i < categoryData.length-1 ? '1px solid #F9FAFB' : 'none' }}>
+                <tr key={row.name} onClick={() => setSelectedCategory(row)} style={{
+                  borderBottom: i < categoryData.length-1 ? '1px solid #F9FAFB' : 'none', cursor: 'pointer',
+                }}>
                   <td style={{ padding:'10px 14px', display:'flex', alignItems:'center', gap:8 }}>
                     <span style={{ width:8,height:8,borderRadius:'50%',background:row.color,flexShrink:0,display:'inline-block' }}/>
                     <span style={{ fontSize:12.5, color:'#374151' }}>{row.name}</span>
@@ -174,11 +184,12 @@ export default function VehicleRegistration() {
                 tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 10.5, fill: '#374151' }} axisLine={false} tickLine={false} />
               <Tooltip formatter={v => [v.toLocaleString('en-IN'), 'Vehicles']} />
-              <Bar dataKey="value" radius={[0,4,4,0]} maxBarSize={18}>
+              <Bar dataKey="value" radius={[0,4,4,0]} maxBarSize={18} onClick={setSelectedDivision} cursor="pointer">
                 {divisionData.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          <p style={{ fontSize: 10.5, color: '#C4C9D2', marginTop: 6 }}>Click a bar for division details</p>
         </Card>
       </div>
 
@@ -196,7 +207,9 @@ export default function VehicleRegistration() {
             </thead>
             <tbody>
               {rcTransactions.map((row, i) => (
-                <tr key={row.regNo} style={{ borderBottom: i < rcTransactions.length-1 ? '1px solid #F9FAFB':'none' }}>
+                <tr key={row.regNo} onClick={() => setSelectedTxn(row)} style={{
+                  borderBottom: i < rcTransactions.length-1 ? '1px solid #F9FAFB':'none', cursor: 'pointer',
+                }}>
                   <td style={{ padding:'13px 16px', fontSize:13.5, color:'#374151' }}>{row.regNo}</td>
                   <td style={{ padding:'13px 16px', fontSize:13.5, color:'#374151' }}>{row.type}</td>
                   <td style={{ padding:'13px 16px', fontSize:13.5, color:row.sc, fontWeight:500 }}>{row.status}</td>
@@ -273,6 +286,45 @@ export default function VehicleRegistration() {
           ))}
         </div>
       </Card>
+
+      <DetailModal
+        open={!!selectedCategory}
+        onClose={() => setSelectedCategory(null)}
+        title={selectedCategory?.name}
+        subtitle="Vehicle Category · Karnataka as on 31-03-2025"
+        accent={selectedCategory?.color}
+        rows={selectedCategory ? [
+          ['Newly Registered 2024-25', selectedCategory.newly2425.toLocaleString('en-IN')],
+          ['Total on Road', selectedCategory.total.toLocaleString('en-IN')],
+          ['% Growth YoY', `+${selectedCategory.pct}%`],
+          ['Share of All Categories Total', `${((selectedCategory.total / categoryData.reduce((s, c) => s + c.total, 0)) * 100).toFixed(1)}%`],
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedDivision}
+        onClose={() => setSelectedDivision(null)}
+        title={selectedDivision?.name?.replace('\n', ' ')}
+        subtitle="Division-wise New Registrations 2024-25"
+        accent={selectedDivision?.color}
+        rows={selectedDivision ? [
+          ['Newly Registered 2024-25', selectedDivision.value.toLocaleString('en-IN')],
+          ['Share of State Total', `${((selectedDivision.value / divisionTotal) * 100).toFixed(1)}%`],
+          ['Rank Among Divisions', `#${divisionData.slice().sort((a,b)=>b.value-a.value).findIndex(d=>d.name===selectedDivision.name)+1} of ${divisionData.length}`],
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedTxn}
+        onClose={() => setSelectedTxn(null)}
+        title={selectedTxn?.regNo}
+        subtitle="RC Transaction Detail"
+        accent={selectedTxn?.sc}
+        rows={selectedTxn ? [
+          ['Transaction Type', selectedTxn.type],
+          ['Status', selectedTxn.status],
+        ] : []}
+      />
     </div>
   )
 }

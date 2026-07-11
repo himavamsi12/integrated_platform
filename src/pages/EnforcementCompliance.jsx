@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line,
 } from 'recharts'
+import DetailModal from '../components/DetailModal'
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.07)', ...style }}>
@@ -26,7 +28,18 @@ const offenseData = [
   { name: 'No Helmet', value: 450, color: '#A78BFA' },
 ]
 
+const violations = [
+  { veh: 'KA01AB1234', off: 'Over Speed', loc: 'MG Road', date: '15 Jun', fine: '₹2,000', status: 'Paid', sc: '#22C55E' },
+  { veh: 'KA02CD5678', off: 'Signal Jump', loc: 'Ring Road', date: '15 Jun', fine: '₹1,000', status: 'Pending', sc: '#F59E0B' },
+  { veh: 'KA03EF9012', off: 'Drunk Drive', loc: 'NH-48', date: '14 Jun', fine: '₹10,000', status: 'Paid', sc: '#22C55E' },
+  { veh: 'KA04GH3456', off: 'No Helmet', loc: 'Old Town', date: '14 Jun', fine: '₹500', status: 'Pending', sc: '#F59E0B' },
+]
+
 export default function EnforcementCompliance() {
+  const [selectedOffense, setSelectedOffense] = useState(null)
+  const [selectedViolation, setSelectedViolation] = useState(null)
+  const offenseTotal = offenseData.reduce((s, o) => s + o.value, 0)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Card style={{ padding: 0 }}>
@@ -79,7 +92,7 @@ export default function EnforcementCompliance() {
               <XAxis dataKey="name" tick={{ fontSize: 10.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <Tooltip />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
+              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40} onClick={setSelectedOffense} cursor="pointer">
                 {offenseData.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Bar>
             </BarChart>
@@ -98,13 +111,8 @@ export default function EnforcementCompliance() {
             </tr>
           </thead>
           <tbody>
-            {[
-              { veh: 'KA01AB1234', off: 'Over Speed', loc: 'MG Road', date: '15 Jun', fine: '₹2,000', status: 'Paid', sc: '#22C55E' },
-              { veh: 'KA02CD5678', off: 'Signal Jump', loc: 'Ring Road', date: '15 Jun', fine: '₹1,000', status: 'Pending', sc: '#F59E0B' },
-              { veh: 'KA03EF9012', off: 'Drunk Drive', loc: 'NH-48', date: '14 Jun', fine: '₹10,000', status: 'Paid', sc: '#22C55E' },
-              { veh: 'KA04GH3456', off: 'No Helmet', loc: 'Old Town', date: '14 Jun', fine: '₹500', status: 'Pending', sc: '#F59E0B' },
-            ].map((row, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #F9FAFB' }}>
+            {violations.map((row, i) => (
+              <tr key={i} onClick={() => setSelectedViolation(row)} style={{ borderBottom: '1px solid #F9FAFB', cursor: 'pointer' }}>
                 <td style={{ padding: '12px', fontSize: 13.5, color: '#374151' }}>{row.veh}</td>
                 <td style={{ padding: '12px', fontSize: 13.5, color: '#374151' }}>{row.off}</td>
                 <td style={{ padding: '12px', fontSize: 13.5, color: '#374151' }}>{row.loc}</td>
@@ -118,6 +126,33 @@ export default function EnforcementCompliance() {
           </tbody>
         </table>
       </Card>
+
+      <DetailModal
+        open={!!selectedOffense}
+        onClose={() => setSelectedOffense(null)}
+        title={selectedOffense?.name}
+        subtitle="Offense Breakdown"
+        accent={selectedOffense?.color}
+        rows={selectedOffense ? [
+          ['Cases Recorded', selectedOffense.value.toLocaleString('en-IN')],
+          ['Share of All Offenses', `${((selectedOffense.value / offenseTotal) * 100).toFixed(1)}%`],
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedViolation}
+        onClose={() => setSelectedViolation(null)}
+        title={selectedViolation?.veh}
+        subtitle="Violation Record"
+        accent={selectedViolation?.sc}
+        rows={selectedViolation ? [
+          ['Offense', selectedViolation.off],
+          ['Location', selectedViolation.loc],
+          ['Date', selectedViolation.date],
+          ['Fine Amount', selectedViolation.fine],
+          ['Status', selectedViolation.status],
+        ] : []}
+      />
     </div>
   )
 }

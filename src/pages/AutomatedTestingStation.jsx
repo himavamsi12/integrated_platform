@@ -4,6 +4,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend,
 } from 'recharts'
 import { Search, Download, MoreVertical, FileText, CheckSquare, Square } from 'lucide-react'
+import DetailModal from '../components/DetailModal'
 
 const passFail = [
   { date: 'May 5', pass: 195, fail: 122 },
@@ -95,6 +96,9 @@ function DashboardTab() {
   const [period, setPeriod] = useState('Day')
   const [checked, setChecked] = useState([true, true, true])
   const [headerChecked, setHeaderChecked] = useState(null)
+  const [selectedStation, setSelectedStation] = useState(null)
+  const [selectedFailReason, setSelectedFailReason] = useState(null)
+  const failReasonTotal = failReasons.reduce((s, f) => s + f.value, 0)
 
   const toggleRow = (i) => {
     const next = [...checked]
@@ -125,8 +129,10 @@ function DashboardTab() {
           </thead>
           <tbody>
             {stationData.map((row, i) => (
-              <tr key={row.id} style={{ borderBottom: i < stationData.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
-                <td style={{ padding: '14px 16px' }}>
+              <tr key={row.id} onClick={() => setSelectedStation(row)} style={{
+                borderBottom: i < stationData.length - 1 ? '1px solid #F9FAFB' : 'none', cursor: 'pointer',
+              }}>
+                <td style={{ padding: '14px 16px' }} onClick={e => e.stopPropagation()}>
                   <div
                     onClick={() => toggleRow(i)}
                     style={{
@@ -220,7 +226,7 @@ function DashboardTab() {
               <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} ticks={[0, 200, 400, 600]} />
               <Tooltip />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={38}>
+              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={38} onClick={setSelectedFailReason} cursor="pointer">
                 {failReasons.map((entry, i) => <Cell key={i} fill={entry.color} />)}
               </Bar>
             </BarChart>
@@ -267,6 +273,32 @@ function DashboardTab() {
           </div>
         </Card>
       </div>
+
+      <DetailModal
+        open={!!selectedStation}
+        onClose={() => setSelectedStation(null)}
+        title={selectedStation?.station}
+        subtitle="Automated Testing Station Detail"
+        rows={selectedStation ? [
+          ['Rank', `#${selectedStation.rank}`],
+          ['Total Tests', selectedStation.tests],
+          ['Pass Rate', `${selectedStation.pass}%`],
+          ['Fail Rate', `${selectedStation.fail}%`],
+          ['Avg Turnaround Time', selectedStation.avgTAT],
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedFailReason}
+        onClose={() => setSelectedFailReason(null)}
+        title={selectedFailReason?.name}
+        subtitle="Fail Reason Breakdown"
+        accent={selectedFailReason?.color}
+        rows={selectedFailReason ? [
+          ['Failures Recorded', selectedFailReason.value.toLocaleString('en-IN')],
+          ['Share of All Failures', `${((selectedFailReason.value / failReasonTotal) * 100).toFixed(1)}%`],
+        ] : []}
+      />
     </div>
   )
 }
@@ -276,6 +308,7 @@ function SearchTab() {
   const [name, setName] = useState('')
   const [searched, setSearched] = useState(false)
   const [reports, setReports] = useState(reportData)
+  const [selectedReport, setSelectedReport] = useState(null)
 
   const handleSearch = () => setSearched(true)
 
@@ -377,11 +410,13 @@ function SearchTab() {
           </thead>
           <tbody>
             {reports.map((row, i) => (
-              <tr key={row.id} style={{ borderBottom: i < reports.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
+              <tr key={row.id} onClick={() => setSelectedReport(row)} style={{
+                borderBottom: i < reports.length - 1 ? '1px solid #F9FAFB' : 'none', cursor: 'pointer',
+              }}>
                 <td style={{ padding: '14px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div
-                      onClick={() => toggleReport(row.id)}
+                      onClick={(e) => { e.stopPropagation(); toggleReport(row.id) }}
                       style={{
                         width: 17, height: 17, borderRadius: 4, cursor: 'pointer', flexShrink: 0,
                         background: row.checked ? '#3B82F6' : 'white',
@@ -405,7 +440,7 @@ function SearchTab() {
                 <td style={{ padding: '14px 16px', fontSize: 13.5, color: '#374151' }}>{row.reading}</td>
                 <td style={{ padding: '14px 16px', fontSize: 13.5, fontWeight: 600, color: '#374151' }}>{row.status}</td>
                 <td style={{ padding: '14px 16px', fontSize: 13.5, color: '#6B7280' }}>{row.users}</td>
-                <td style={{ padding: '14px 16px' }}>
+                <td style={{ padding: '14px 16px' }} onClick={e => e.stopPropagation()}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <button style={{
                       padding: '6px 14px', background: '#1F2937', color: 'white',
@@ -422,6 +457,19 @@ function SearchTab() {
           </tbody>
         </table>
       </Card>
+
+      <DetailModal
+        open={!!selectedReport}
+        onClose={() => setSelectedReport(null)}
+        title={selectedReport?.param}
+        subtitle="Test Report Parameter Detail"
+        rows={selectedReport ? [
+          ['Standard', selectedReport.standard],
+          ['Reading', selectedReport.reading],
+          ['Status', selectedReport.status],
+          ['Users', selectedReport.users],
+        ] : []}
+      />
     </div>
   )
 }

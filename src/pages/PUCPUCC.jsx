@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line,
 } from 'recharts'
+import DetailModal from '../components/DetailModal'
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.07)', ...style }}>
@@ -25,7 +27,18 @@ const categoryData = [
   { name: 'Bus/Truck', value: 60, color: '#F59E0B' },
 ]
 
+const pucCenters = [
+  { name: 'Green Auto PUC', loc: 'JP Nagar', issued: 280, failed: 12, comp: '95.7%' },
+  { name: 'EcoCheck Center', loc: 'Koramangala', issued: 245, failed: 8, comp: '96.7%' },
+  { name: 'AutoTest PUCC', loc: 'Marathahalli', issued: 210, failed: 15, comp: '92.9%' },
+  { name: 'ClearAir Testing', loc: 'Whitefield', issued: 195, failed: 6, comp: '96.9%' },
+]
+
 export default function PUCPUCC() {
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [selectedCenter, setSelectedCenter] = useState(null)
+  const categoryTotal = categoryData.reduce((s, c) => s + c.value, 0)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Card style={{ padding: 0 }}>
@@ -77,7 +90,7 @@ export default function PUCPUCC() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <Tooltip />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={42}>
+              <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={42} onClick={setSelectedCategory} cursor="pointer">
                 {categoryData.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Bar>
             </BarChart>
@@ -96,13 +109,8 @@ export default function PUCPUCC() {
             </tr>
           </thead>
           <tbody>
-            {[
-              { name: 'Green Auto PUC', loc: 'JP Nagar', issued: 280, failed: 12, comp: '95.7%' },
-              { name: 'EcoCheck Center', loc: 'Koramangala', issued: 245, failed: 8, comp: '96.7%' },
-              { name: 'AutoTest PUCC', loc: 'Marathahalli', issued: 210, failed: 15, comp: '92.9%' },
-              { name: 'ClearAir Testing', loc: 'Whitefield', issued: 195, failed: 6, comp: '96.9%' },
-            ].map((row, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #F9FAFB' }}>
+            {pucCenters.map((row, i) => (
+              <tr key={i} onClick={() => setSelectedCenter(row)} style={{ borderBottom: '1px solid #F9FAFB', cursor: 'pointer' }}>
                 <td style={{ padding: '12px 14px', fontSize: 13.5, color: '#374151', fontWeight: 500 }}>{row.name}</td>
                 <td style={{ padding: '12px 14px', fontSize: 13.5, color: '#374151' }}>{row.loc}</td>
                 <td style={{ padding: '12px 14px', fontSize: 13.5, color: '#374151' }}>{row.issued}</td>
@@ -113,6 +121,31 @@ export default function PUCPUCC() {
           </tbody>
         </table>
       </Card>
+
+      <DetailModal
+        open={!!selectedCategory}
+        onClose={() => setSelectedCategory(null)}
+        title={selectedCategory?.name}
+        subtitle="PUC Certificates by Vehicle Category"
+        accent={selectedCategory?.color}
+        rows={selectedCategory ? [
+          ['Certificates Issued', selectedCategory.value.toLocaleString('en-IN')],
+          ['Share of Total', `${((selectedCategory.value / categoryTotal) * 100).toFixed(1)}%`],
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedCenter}
+        onClose={() => setSelectedCenter(null)}
+        title={selectedCenter?.name}
+        subtitle="PUCC Center Detail"
+        rows={selectedCenter ? [
+          ['Location', selectedCenter.loc],
+          ['Certificates Issued', selectedCenter.issued],
+          ['Failed Count', selectedCenter.failed],
+          ['Compliance %', selectedCenter.comp],
+        ] : []}
+      />
     </div>
   )
 }

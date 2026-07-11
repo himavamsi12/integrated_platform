@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Cell,
 } from 'recharts'
+import DetailModal from '../components/DetailModal'
 
 const Card = ({ children, style = {} }) => (
   <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.07)', ...style }}>
@@ -26,7 +28,18 @@ const hotspots = [
   { name: 'Electronic City', value: 9, color: '#34D399' },
 ]
 
+const accidentReports = [
+  { id: 'ACC-001', loc: 'NH-48 Km 24', dt: '15 Jun 08:42', veh: '3', cas: '2 injured', sev: 'Serious', sc: '#F59E0B' },
+  { id: 'ACC-002', loc: 'MG Road Jn', dt: '15 Jun 11:15', veh: '2', cas: '1 fatal', sev: 'Fatal', sc: '#EF4444' },
+  { id: 'ACC-003', loc: 'Ring Road', dt: '14 Jun 22:30', veh: '1', cas: 'None', sev: 'Minor', sc: '#22C55E' },
+  { id: 'ACC-004', loc: 'Electronic City', dt: '14 Jun 17:50', veh: '4', cas: '3 injured', sev: 'Serious', sc: '#F59E0B' },
+]
+
 export default function RoadSafety() {
+  const [selectedHotspot, setSelectedHotspot] = useState(null)
+  const [selectedReport, setSelectedReport] = useState(null)
+  const hotspotTotal = hotspots.reduce((s, h) => s + h.value, 0)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <Card style={{ padding: 0 }}>
@@ -78,7 +91,7 @@ export default function RoadSafety() {
               <XAxis type="number" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11.5, fill: '#374151' }} axisLine={false} tickLine={false} />
               <Tooltip />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={18}>
+              <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={18} onClick={setSelectedHotspot} cursor="pointer">
                 {hotspots.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Bar>
             </BarChart>
@@ -97,13 +110,8 @@ export default function RoadSafety() {
             </tr>
           </thead>
           <tbody>
-            {[
-              { id: 'ACC-001', loc: 'NH-48 Km 24', dt: '15 Jun 08:42', veh: '3', cas: '2 injured', sev: 'Serious', sc: '#F59E0B' },
-              { id: 'ACC-002', loc: 'MG Road Jn', dt: '15 Jun 11:15', veh: '2', cas: '1 fatal', sev: 'Fatal', sc: '#EF4444' },
-              { id: 'ACC-003', loc: 'Ring Road', dt: '14 Jun 22:30', veh: '1', cas: 'None', sev: 'Minor', sc: '#22C55E' },
-              { id: 'ACC-004', loc: 'Electronic City', dt: '14 Jun 17:50', veh: '4', cas: '3 injured', sev: 'Serious', sc: '#F59E0B' },
-            ].map((row, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid #F9FAFB' }}>
+            {accidentReports.map((row, i) => (
+              <tr key={i} onClick={() => setSelectedReport(row)} style={{ borderBottom: '1px solid #F9FAFB', cursor: 'pointer' }}>
                 <td style={{ padding: '12px 14px', fontSize: 13.5, color: '#7C3AED', fontWeight: 600 }}>{row.id}</td>
                 <td style={{ padding: '12px 14px', fontSize: 13.5, color: '#374151' }}>{row.loc}</td>
                 <td style={{ padding: '12px 14px', fontSize: 13.5, color: '#374151' }}>{row.dt}</td>
@@ -117,6 +125,33 @@ export default function RoadSafety() {
           </tbody>
         </table>
       </Card>
+
+      <DetailModal
+        open={!!selectedHotspot}
+        onClose={() => setSelectedHotspot(null)}
+        title={selectedHotspot?.name}
+        subtitle="Accident Hotspot"
+        accent={selectedHotspot?.color}
+        rows={selectedHotspot ? [
+          ['Accidents Recorded', selectedHotspot.value],
+          ['Share of All Hotspot Accidents', `${((selectedHotspot.value / hotspotTotal) * 100).toFixed(1)}%`],
+        ] : []}
+      />
+
+      <DetailModal
+        open={!!selectedReport}
+        onClose={() => setSelectedReport(null)}
+        title={selectedReport?.id}
+        subtitle="Accident Report"
+        accent={selectedReport?.sc}
+        rows={selectedReport ? [
+          ['Location', selectedReport.loc],
+          ['Date/Time', selectedReport.dt],
+          ['Vehicles Involved', selectedReport.veh],
+          ['Casualties', selectedReport.cas],
+          ['Severity', selectedReport.sev],
+        ] : []}
+      />
     </div>
   )
 }

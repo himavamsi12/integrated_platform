@@ -1,12 +1,18 @@
-import { Home, FileText, Layers, ClipboardList, TrendingUp, Shield, Car, MoreVertical } from 'lucide-react'
+import {
+  Home, FileText, Layers, ClipboardList, TrendingUp, Shield, Car, MoreVertical,
+  LayoutDashboard, Building2, Landmark,
+} from 'lucide-react'
 
 const navItems = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'automated-testing', label: 'Automated Testing Station', icon: Home },
   { id: 'driving-license', label: 'Driving License', icon: FileText },
+  { id: 'vehicle-registration', label: 'Vehicle Registration', icon: Car },
+  { id: 'rto-permits', label: 'RTO Performance & Permits', icon: Building2 },
+  { id: 'economic-impact', label: 'Economic Impact (GSDP)', icon: Landmark },
   { id: 'enforcement', label: 'Enforcement & Compliance Dashboard', icon: ClipboardList },
   { id: 'tax-revenue', label: 'Tax & Revenue Monitoring', icon: TrendingUp },
   { id: 'road-safety', label: 'Road Safety & Accident', icon: Shield },
-  { id: 'vehicle-registration', label: 'Vehicle Registration', icon: Car },
   { id: 'puc-pucc', label: 'PUC / PUCC', icon: Layers },
 ]
 
@@ -33,7 +39,10 @@ const UserAvatar = () => (
   }}>D</div>
 )
 
-export default function Sidebar({ activePage, setActivePage }) {
+export default function Sidebar({ activePage, setActivePage, searchQuery = '' }) {
+  const q = searchQuery.trim().toLowerCase()
+  const visibleItems = q ? navItems.filter(n => n.label.toLowerCase().includes(q)) : navItems
+
   return (
     <div style={{
       width: 196, minHeight: '100vh', background: 'white',
@@ -46,8 +55,11 @@ export default function Sidebar({ activePage, setActivePage }) {
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, paddingBottom: 12 }}>
-        {navItems.map(({ id, label, icon: Icon }) => {
+      <nav style={{ flex: 1, paddingBottom: 12, overflowY: 'auto' }}>
+        {visibleItems.length === 0 && (
+          <div style={{ padding: '10px 16px', fontSize: 12, color: '#9CA3AF' }}>No matching module</div>
+        )}
+        {visibleItems.map(({ id, label, icon: Icon }) => {
           const isActive = activePage === id
           return (
             <button
