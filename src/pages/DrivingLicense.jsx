@@ -93,13 +93,13 @@ export default function DrivingLicense() {
           <h3 style={{ fontSize:15, fontWeight:700, color:'#1F2937', marginBottom:4 }}>
             Total Driving Licenses – Karnataka (Cumulative)
           </h3>
-          <p style={{ fontSize:12, color:'#9CA3AF', marginBottom:14 }}>All valid DLs as on 31st March each year · Y-axis in Millions (M)</p>
+          <p style={{ fontSize:12, color:'#9CA3AF', marginBottom:14 }}>All valid DLs as on 31st March each year · Y-axis in Lakhs (L)</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={dlGrowth} margin={{ top:5, right:10, left:10, bottom:0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" vertical={false} />
               <XAxis dataKey="year" tick={{ fontSize:12, fill:'#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize:10.5, fill:'#9CA3AF' }} axisLine={false} tickLine={false}
-                tickFormatter={v => `${(v/1000000).toFixed(1)}M`} />
+                tickFormatter={v => `${(v/100000).toFixed(0)}L`} />
               <Tooltip formatter={v => [v.toLocaleString('en-IN'), 'Total DLs']} />
               <Bar dataKey="total" fill="#7C3AED" radius={[5,5,0,0]} maxBarSize={48} onClick={openYear} cursor="pointer" />
             </BarChart>
