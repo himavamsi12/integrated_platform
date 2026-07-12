@@ -124,7 +124,7 @@ export default function VehicleRegistration() {
             <XAxis dataKey="month" tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 10.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false}
               tickFormatter={v => `${(v/1000).toFixed(0)}K`} />
-            <Tooltip formatter={(v, n) => [v.toLocaleString('en-IN'), n === 'twoWheelers' ? 'Two Wheelers' : 'Cars']} />
+            <Tooltip formatter={(v, n) => [v.toLocaleString('en-IN'), n]} />
             <Bar dataKey="twoWheelers" fill="#7C3AED" radius={[3,3,0,0]} maxBarSize={22} name="Two Wheelers" />
             <Bar dataKey="cars"        fill="#60A5FA" radius={[3,3,0,0]} maxBarSize={22} name="Cars" />
           </BarChart>

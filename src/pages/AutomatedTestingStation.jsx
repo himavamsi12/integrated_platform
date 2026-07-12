@@ -6,19 +6,37 @@ import {
 import { Search, Download, MoreVertical, FileText, CheckSquare, Square } from 'lucide-react'
 import DetailModal from '../components/DetailModal'
 
-const passFail = [
-  { date: 'May 5', pass: 195, fail: 122 },
-  { date: 'May 6', pass: 208, fail: 130 },
-  { date: 'May 7', pass: 232, fail: 148 },
-  { date: 'May 8', pass: 278, fail: 178 },
-  { date: 'May 9', pass: 340, fail: 228 },
-  { date: 'May 10', pass: 315, fail: 252 },
-  { date: 'May 11', pass: 285, fail: 220 },
-  { date: 'May 12', pass: 248, fail: 188 },
-  { date: 'May 13', pass: 218, fail: 158 },
-  { date: 'May 14', pass: 182, fail: 130 },
-  { date: 'May 15', pass: 158, fail: 98 },
-]
+const passFailByPeriod = {
+  Day: [
+    { label: 'May 5', pass: 195, fail: 122 },
+    { label: 'May 6', pass: 208, fail: 130 },
+    { label: 'May 7', pass: 232, fail: 148 },
+    { label: 'May 8', pass: 278, fail: 178 },
+    { label: 'May 9', pass: 340, fail: 228 },
+    { label: 'May 10', pass: 315, fail: 252 },
+    { label: 'May 11', pass: 285, fail: 220 },
+    { label: 'May 12', pass: 248, fail: 188 },
+    { label: 'May 13', pass: 218, fail: 158 },
+    { label: 'May 14', pass: 182, fail: 130 },
+    { label: 'May 15', pass: 158, fail: 98 },
+  ],
+  Week: [
+    { label: 'Week 1', pass: 1200, fail: 820 },
+    { label: 'Week 2', pass: 1350, fail: 900 },
+    { label: 'Week 3', pass: 1580, fail: 1050 },
+    { label: 'Week 4', pass: 1420, fail: 980 },
+    { label: 'Week 5', pass: 1290, fail: 860 },
+    { label: 'Week 6', pass: 1100, fail: 740 },
+  ],
+  Month: [
+    { label: 'Jan', pass: 5200, fail: 3400 },
+    { label: 'Feb', pass: 5600, fail: 3700 },
+    { label: 'Mar', pass: 6100, fail: 4000 },
+    { label: 'Apr', pass: 6400, fail: 4200 },
+    { label: 'May', pass: 5900, fail: 3900 },
+    { label: 'Jun', pass: 6300, fail: 4100 },
+  ],
+}
 
 const dailyMetrics = [
   { day: 'Mon', value: 26 },
@@ -33,14 +51,14 @@ const failReasons = [
   { name: 'Alignment', value: 375, color: '#F87171' },
   { name: 'Headlight', value: 290, color: '#F59E0B' },
   { name: 'Suspension', value: 315, color: '#A78BFA' },
-  { name: 'Category 2', value: 450, color: '#9CA3AF' },
-  { name: 'Category 2', value: 490, color: '#3B82F6' },
+  { name: 'Brake Fluid', value: 450, color: '#9CA3AF' },
+  { name: 'Tyre Wear', value: 490, color: '#3B82F6' },
 ]
 
-const passfailBars = [
+const revenueByCategory = [
   { name: 'Category 1', value: 65000, color: '#60A5FA' },
   { name: 'Category 2', value: 82000, color: '#34D399' },
-  { name: 'Category 2', value: 62000, color: '#F87171' },
+  { name: 'Category 3', value: 62000, color: '#F87171' },
 ]
 
 const stationData = [
@@ -76,16 +94,23 @@ const DropdownBtn = ({ label }) => (
   </button>
 )
 
-const formatCurrency = (v) => `$${(v / 1000).toFixed(0)}k`
+const formatRupees = (v) => `₹${(v / 1000).toFixed(0)}k`
+const formatCompact = (v) => v >= 1000 ? `${(v / 1000).toFixed(1)}K` : v
 
 function CustomTooltip({ active, payload, label }) {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: '#5B21B6', color: 'white', padding: '4px 10px',
-        borderRadius: 6, fontSize: 13, fontWeight: 600,
+        background: '#1F2937', color: 'white', padding: '8px 12px',
+        borderRadius: 8, fontSize: 12.5,
       }}>
-        {payload[0]?.value}
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
+        {payload.map((p, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: p.color, display: 'inline-block' }} />
+            <span>{p.name}: {p.value.toLocaleString('en-IN')}</span>
+          </div>
+        ))}
       </div>
     )
   }
@@ -185,26 +210,34 @@ function DashboardTab() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={230}>
-            <ComposedChart data={passFail} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <ComposedChart data={passFailByPeriod[period]} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} domain={[0, 420]} ticks={[0, 100, 200, 300, 400]} />
+              <XAxis dataKey="label" tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={formatCompact} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="pass" stroke="#22C55E" fill="#DCFCE7" strokeWidth={2.5} dot={false} activeDot={{ r: 6, fill: '#22C55E' }} />
-              <Line type="monotone" dataKey="fail" stroke="#F59E0B" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#F59E0B' }} />
+              <Area type="monotone" dataKey="pass" name="Pass" stroke="#22C55E" fill="#DCFCE7" strokeWidth={2.5} dot={false} activeDot={{ r: 6, fill: '#22C55E' }} />
+              <Line type="monotone" dataKey="fail" name="Fail" stroke="#F59E0B" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#F59E0B' }} />
             </ComposedChart>
           </ResponsiveContainer>
+          <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+            {[['#22C55E', 'Pass'], ['#F59E0B', 'Fail']].map(([c, l]) => (
+              <span key={l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#6B7280' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: c, display: 'inline-block' }} />{l}
+              </span>
+            ))}
+          </div>
         </Card>
 
         {/* Daily Metrics */}
         <Card>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1F2937', marginBottom: 16 }}>Daily Metrics</h3>
-          <ResponsiveContainer width="100%" height={190}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1F2937', marginBottom: 4 }}>Daily Test Failures</h3>
+          <p style={{ fontSize: 11.5, color: '#9CA3AF', marginBottom: 12 }}>Number of failed tests recorded per weekday</p>
+          <ResponsiveContainer width="100%" height={175}>
             <BarChart data={dailyMetrics} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" vertical={false} />
               <XAxis dataKey="day" tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} ticks={[0, 10, 20]} />
-              <Tooltip cursor={{ fill: '#F5F3FF' }} />
+              <Tooltip cursor={{ fill: '#F5F3FF' }} formatter={v => [v, 'Failed Tests']} />
               <Bar dataKey="value" fill="#8B5CF6" radius={[4, 4, 0, 0]} maxBarSize={36} />
             </BarChart>
           </ResponsiveContainer>
@@ -241,30 +274,30 @@ function DashboardTab() {
           </div>
         </Card>
 
-        {/* Pass/Fail Trend (bar) */}
+        {/* Revenue by Test Category */}
         <Card>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1F2937', marginBottom: 12 }}>Pass/Fail Trend</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1F2937', marginBottom: 12 }}>Revenue by Test Category (₹)</h3>
           <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             <DropdownBtn label="Metric" />
             <DropdownBtn label="Today" />
           </div>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={passfailBars} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+            <BarChart data={revenueByCategory} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" vertical={false} />
               <XAxis dataKey="name" tick={false} axisLine={false} tickLine={false} />
               <YAxis
                 tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false}
-                tickFormatter={v => `$${v / 1000}k`}
+                tickFormatter={formatRupees}
                 ticks={[0, 20000, 40000, 60000, 80000, 100000]}
               />
-              <Tooltip formatter={(v) => [`$${(v / 1000).toFixed(0)}k`]} />
+              <Tooltip formatter={(v) => [formatRupees(v), 'Revenue']} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                {passfailBars.map((e, i) => <Cell key={i} fill={e.color} />)}
+                {revenueByCategory.map((e, i) => <Cell key={i} fill={e.color} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
           <div style={{ display: 'flex', gap: 14, marginTop: 8 }}>
-            {passfailBars.map((item, i) => (
+            {revenueByCategory.map((item, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: '#6B7280' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, display: 'inline-block' }} />
                 {item.name}

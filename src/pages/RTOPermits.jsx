@@ -182,11 +182,11 @@ export default function RTOPermits() {
             }}>{d}</button>
           ))}
         </div>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={290}>
+          <BarChart data={rows} layout="vertical" margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 10.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="rto" width={110} tick={{ fontSize: 10.5, fill: '#374151' }} axisLine={false} tickLine={false} />
+            <YAxis type="category" dataKey="rto" width={110} interval={0} tick={{ fontSize: 10.5, fill: '#374151' }} axisLine={false} tickLine={false} />
             <Tooltip formatter={v => [v, 'Total (2022-25)']} />
             <Bar dataKey="total" radius={[0, 4, 4, 0]} maxBarSize={16} onClick={openRto} cursor="pointer">
               {rows.map((r, i) => (

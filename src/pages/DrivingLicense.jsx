@@ -93,7 +93,7 @@ export default function DrivingLicense() {
           <h3 style={{ fontSize:15, fontWeight:700, color:'#1F2937', marginBottom:4 }}>
             Total Driving Licenses – Karnataka (Cumulative)
           </h3>
-          <p style={{ fontSize:12, color:'#9CA3AF', marginBottom:14 }}>All valid DLs as on 31st March each year</p>
+          <p style={{ fontSize:12, color:'#9CA3AF', marginBottom:14 }}>All valid DLs as on 31st March each year · Y-axis in Millions (M)</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={dlGrowth} margin={{ top:5, right:10, left:10, bottom:0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" vertical={false} />
@@ -153,13 +153,16 @@ export default function DrivingLicense() {
 
       {/* Pendency & SLA – using real stats */}
       <div>
-        <h2 style={{ fontSize:18, fontWeight:700, color:'#1F2937', marginBottom:12 }}>Key DL Statistics 2024-25</h2>
+        <h2 style={{ fontSize:18, fontWeight:700, color:'#1F2937', marginBottom:4 }}>Key DL Statistics</h2>
+        <p style={{ fontSize:12, color:'#9CA3AF', marginBottom:12 }}>
+          Male/Female figures are new DLs issued in FY 2024-25 only · Total is the cumulative count of all DLs ever issued
+        </p>
         <Card style={{ padding:0 }}>
           <div style={{ display:'flex' }}>
             {[
-              { value:'12,01,894', label:'Male DL Issued' },
-              { value:'2,35,492',  label:'Female DL Issued' },
-              { value:'2,67,86,228', label:'Total DLs (31-03-2025)' },
+              { value:'12,01,894', label:'Male DL Issued (2024-25)' },
+              { value:'2,35,492',  label:'Female DL Issued (2024-25)' },
+              { value:'2,67,86,228', label:'Total DLs Issued (Cumulative, as of 31-03-2025)' },
               { value:'97.7%',     label:'DL Growth vs Last Year' },
             ].map((s, i, arr) => (
               <div key={s.label} style={{

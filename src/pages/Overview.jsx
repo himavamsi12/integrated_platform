@@ -1,5 +1,5 @@
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import {
   Car, FileText, Building2, Landmark, Shield, ClipboardList, Layers, TrendingUp, AlertTriangle,
@@ -78,14 +78,14 @@ export default function Overview({ setActivePage }) {
           <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1F2937', marginBottom: 4 }}>Revenue Collected — 5 Year Trend (₹ Crores)</h3>
           <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14 }}>* 2025-26 figure as on 31-01-2026</p>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={revenueTrend} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+            <BarChart data={revenueTrend} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#F3F4F6" vertical={false} />
               <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10.5, fill: '#9CA3AF' }} axisLine={false} tickLine={false}
                 tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} />
               <Tooltip formatter={v => [`₹${v.toLocaleString('en-IN')} Cr`, 'Collected']} />
-              <Area type="monotone" dataKey="v" stroke="#7C3AED" fill="#EDE9FE" strokeWidth={2.5} />
-            </AreaChart>
+              <Bar dataKey="v" fill="#7C3AED" radius={[4, 4, 0, 0]} maxBarSize={48} />
+            </BarChart>
           </ResponsiveContainer>
         </Card>
 
